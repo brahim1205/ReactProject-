@@ -1,4 +1,5 @@
 import { ScheduledTaskService } from './ScheduledTaskService';
+import { NotificationService } from './NotificationService';
 import { PrismaClient } from '@prisma/client';
 
 export class ScheduledTaskUpdater {
@@ -6,8 +7,8 @@ export class ScheduledTaskUpdater {
   private intervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
 
-  constructor(private prisma: PrismaClient) {
-    this.scheduledTaskService = new ScheduledTaskService(prisma);
+  constructor(private prisma: PrismaClient, private notificationService: NotificationService) {
+    this.scheduledTaskService = new ScheduledTaskService(prisma, notificationService);
   }
 
   /**
@@ -77,9 +78,9 @@ let globalUpdater: ScheduledTaskUpdater | null = null;
 /**
  * Fonction utilitaire pour démarrer le service de mise à jour
  */
-export function startScheduledTaskUpdater(prisma: PrismaClient, intervalMinutes: number = 1): ScheduledTaskUpdater {
+export function startScheduledTaskUpdater(prisma: PrismaClient, notificationService: NotificationService, intervalMinutes: number = 1): ScheduledTaskUpdater {
   if (!globalUpdater) {
-    globalUpdater = new ScheduledTaskUpdater(prisma);
+    globalUpdater = new ScheduledTaskUpdater(prisma, notificationService);
   }
   globalUpdater.start(intervalMinutes);
   return globalUpdater;

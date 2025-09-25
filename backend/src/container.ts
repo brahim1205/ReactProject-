@@ -47,11 +47,11 @@ class DependencyContainer {
   }
 
   getScheduledTaskUpdater() {
-    return new ScheduledTaskUpdater(this.prisma);
+    return new ScheduledTaskUpdater(this.prisma, this.getNotificationService());
   }
 
   startScheduledTaskUpdater(intervalMinutes: number = 1) {
-    return startScheduledTaskUpdater(this.prisma, intervalMinutes);
+    return startScheduledTaskUpdater(this.prisma, this.getNotificationService(), intervalMinutes);
   }
 
   getPrisma() {

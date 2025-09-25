@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { NotificationService } from './NotificationService';
 
 export class ScheduledTaskService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient, private notificationService: NotificationService) {}
 
   /**
    * Met à jour automatiquement les statuts des tâches planifiées
@@ -97,6 +98,38 @@ export class ScheduledTaskService {
           }
         });
         console.log(`⚠️ ${overdueTasks.length} tâche(s) en retard terminée(s)`);
+      }
+
+      // 4. Tâches qui expirent dans exactement 2 minutes et n'ont pas encore reçu de notification
+      const twoMinutesFromNow = new Date(now.getTime() + 2 * 60 * 1000);
+      const tasksExpiringSoon = await this.prisma.todo.findMany({
+        where: {
+          status: { in: ['pending', 'in_progress'] },
+          endDateTime: {
+            gte: now,
+            lte: twoMinutesFromNow
+          },
+          expirationWarningSent: false
+        }
+      });
+
+      if (tasksExpiringSoon.length > 0) {
+        // Marquer les tâches comme ayant reçu la notification
+        await this.prisma.todo.updateMany({
+          where: {
+            id: { in: tasksExpiringSoon.map(t => t.id) }
+          },
+          data: {
+            expirationWarningSent: true
+          }
+        });
+
+        // Envoyer des notifications
+        for (const task of tasksExpiringSoon) {
+          await this.notificationService.notifyTaskExpiringSoon(task.id, task.title, task.userId);
+        }
+
+        console.log(`🔔 ${tasksExpiringSoon.length} notification(s) d'expiration envoyée(s)`);
       }
 
     } catch (error) {

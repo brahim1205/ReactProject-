@@ -11,6 +11,34 @@ export const useSocket = () => {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  // Fonction pour jouer le son de cloche
+  const playBellSound = () => {
+    try {
+      // Créer un son de cloche simple avec Web Audio API
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Configuration du son (cloche-like)
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+      oscillator.type = 'sine';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (error) {
+      console.error('Erreur lors de la lecture du son:', error);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       // Récupérer le token depuis localStorage
@@ -42,6 +70,11 @@ export const useSocket = () => {
           // Recharger les notifications et le compteur
           loadNotifications();
           loadUnreadCount();
+
+          // Jouer un son pour les notifications d'expiration imminente
+          if (notification.type === 'task_expiring_soon') {
+            playBellSound();
+          }
 
           // Afficher une notification toast
           showInfo(`Nouvelle notification: ${notification.title}`);

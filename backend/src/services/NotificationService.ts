@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { sendNotification } from '../server';
 
 export class NotificationService {
   constructor(private prisma: PrismaClient) {}
@@ -15,7 +16,7 @@ export class NotificationService {
     todoId?: number | null;
     todoTitle?: string | null;
   }) {
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         type: data.type,
         title: data.title,
@@ -26,6 +27,19 @@ export class NotificationService {
         todoTitle: data.todoTitle || null,
       },
     });
+
+    // Envoyer la notification en temps réel via WebSocket
+    sendNotification(data.recipientId, {
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      createdAt: notification.createdAt,
+      todoId: notification.todoId,
+      todoTitle: notification.todoTitle,
+    });
+
+    return notification;
   }
 
   /**
@@ -127,6 +141,20 @@ export class NotificationService {
       type: 'task_reminder',
       title: 'Rappel de tâche',
       message: `Rappel: La tâche "${todoTitle}" doit commencer bientôt`,
+      recipientId,
+      todoId,
+      todoTitle,
+    });
+  }
+
+  /**
+   * Crée une notification d'expiration imminente pour une tâche
+   */
+  async notifyTaskExpiringSoon(todoId: number, todoTitle: string, recipientId: number) {
+    return this.createNotification({
+      type: 'task_expiring_soon',
+      title: 'Tâche expire bientôt',
+      message: `Votre tâche "${todoTitle}" expire dans 2 minutes`,
       recipientId,
       todoId,
       todoTitle,
