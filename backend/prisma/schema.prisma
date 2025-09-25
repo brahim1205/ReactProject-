@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int     @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  password       String
+  googleId       String?  @unique
+  profileImageUrl String?
+  todos          Todo[]   // ses propres todos
+  assigned       Todo[]   @relation("AssignedTodos")
+  notificationsSent     Notification[] @relation("NotificationSender")
+  notificationsReceived Notification[] @relation("NotificationRecipient")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+
+model Todo {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String?
+  completed    Boolean  @default(false)  // Temporaire pour migration
+  status       String   @default("pending")  // "pending", "in_progress", "completed"
+  priority     String    @default("Moyenne")
+  createdBy    String    @default("Utilisateur")
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id])
+
+  assignedToId Int?
+  assignedTo   User?    @relation("AssignedTodos", fields: [assignedToId], references: [id])
+
+  imageUrl     String?
+  audioUrl     String?
+
+  // Champs pour les tâches planifiées
+  startDateTime DateTime?
+  endDateTime   DateTime?
+
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  type        String   // "task_assigned", "task_completed", "task_reminder"
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+
+  // Utilisateur qui reçoit la notification
+  recipientId Int
+  recipient   User     @relation("NotificationRecipient", fields: [recipientId], references: [id])
+
+  // Utilisateur qui a déclenché la notification (optionnel)
+  senderId    Int?
+  sender      User?    @relation("NotificationSender", fields: [senderId], references: [id])
+
+  // Tâche liée (optionnel) - stocké comme string pour simplifier
+  todoId      Int?
+  todoTitle   String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+
+
