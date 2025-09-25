@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { NotificationService } from '../services/NotificationService';
 
-// Classe utilitaire pour les réponses HTTP standardisées
 class HttpResponse {
   static success<T>(res: Response, data: T, statusCode: number = 200) {
     return res.status(statusCode).json({

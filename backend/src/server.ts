@@ -16,7 +16,6 @@ const io = new Server(server, {
     }
 });
 
-// Middleware d'authentification Socket.IO
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
@@ -32,11 +31,9 @@ io.use((socket, next) => {
     }
 });
 
-// Gestion des connexions Socket.IO
 io.on('connection', (socket) => {
     console.log('User connected:', socket.data.userId);
 
-    // Rejoindre une room spécifique à l'utilisateur
     socket.join(`user_${socket.data.userId}`);
 
     socket.on('disconnect', () => {
@@ -44,7 +41,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Fonction pour envoyer des notifications en temps réel
 export const sendNotification = (userId: number, notification: any) => {
     io.to(`user_${userId}`).emit('notification', notification);
 };
@@ -52,7 +48,6 @@ export const sendNotification = (userId: number, notification: any) => {
 server.listen(port, () => {
     console.log(`le server s'execute sur : http://localhost:${port}`);
 
-    // Démarrer le service de mise à jour automatique des tâches planifiées
     try {
         container.startScheduledTaskUpdater(1); // Vérification toutes les 1 minute
         console.log(' ScheduledTaskUpdater démarré avec succès');

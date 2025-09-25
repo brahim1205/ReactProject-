@@ -14,13 +14,11 @@ export class AppError extends Error {
   }
 }
 
-// Interface pour les erreurs de validation
 export interface ValidationError {
   field: string;
   message: string;
 }
 
-// Gestionnaire d'erreurs global
 export const errorHandler = (
   error: Error | AppError,
   req: Request,
@@ -31,17 +29,14 @@ export const errorHandler = (
   let message = "Erreur interne du serveur";
   let errors: ValidationError[] | undefined;
 
-  // Erreur opérationnelle (prévue)
   if (error instanceof AppError) {
     statusCode = error.statusCode;
     message = error.message;
   }
-  // Erreur de validation Prisma
   else if (error.name === 'ValidationError') {
     statusCode = 400;
     message = "Erreur de validation";
   }
-  // Erreur de contrainte de base de données
   else if (error.name === 'PrismaClientKnownRequestError') {
     const prismaError = error as any;
     switch (prismaError.code) {
@@ -58,7 +53,6 @@ export const errorHandler = (
         message = "Erreur de base de données";
     }
   }
-  // Erreur de validation Zod
   else if (error.name === 'ZodError') {
     statusCode = 400;
     message = "Données invalides";
@@ -68,7 +62,6 @@ export const errorHandler = (
     }));
   }
 
-  // Log de l'erreur en développement
   if (process.env.NODE_ENV === 'development') {
     console.error('Error:', {
       message: error.message,
@@ -82,7 +75,6 @@ export const errorHandler = (
     });
   }
 
-  // Réponse d'erreur standardisée
   return res.status(statusCode).json({
     success: false,
     message,
@@ -95,14 +87,12 @@ export const errorHandler = (
   });
 };
 
-// Middleware pour capturer les erreurs asynchrones
 export const asyncHandler = (fn: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
-// Middleware pour les routes non trouvées
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction): Response => {
   return res.status(404).json({
     success: false,

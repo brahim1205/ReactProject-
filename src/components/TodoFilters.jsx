@@ -6,17 +6,14 @@ const TodoFilters = ({ filter, todos, search, setSearch, currentUser }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
 
-  // Compteurs par priorité
   const urgentCount = todos.filter((t) => t.priority === "Urgente").length;
   const mediumCount = todos.filter((t) => t.priority === "Moyenne").length;
   const lowCount = todos.filter((t) => t.priority === "Basse").length;
   const totalCount = todos.length;
 
-  // Compteurs personnels
   const myTasksCount = todos.filter((t) => t.userId === currentUser?.id || t.createdBy === currentUser?.name).length;
   const assignedToMeCount = todos.filter((t) => t.assignedToId === currentUser?.id).length;
 
-  // Compteurs par statut
   const pendingCount = todos.filter((t) => t.status === "pending").length;
   const inProgressCount = todos.filter((t) => t.status === "in_progress").length;
   const completedCount = todos.filter((t) => t.status === "completed").length;
@@ -147,7 +144,6 @@ const TodoFilters = ({ filter, todos, search, setSearch, currentUser }) => {
 
   return (
     <div className="space-y-4 flex-1 h-fit mb-6">
-      {/* Section Recherche compacte */}
       <div className="join w-full">
         <div className="join-item flex items-center px-3 bg-base-200">
           <Search className="w-4 h-4 text-base-content/60" />
@@ -165,7 +161,6 @@ const TodoFilters = ({ filter, todos, search, setSearch, currentUser }) => {
         />
       </div>
 
-      {/* Onglets compacts */}
       <div className="tabs tabs-boxed bg-base-100 p-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -184,7 +179,6 @@ const TodoFilters = ({ filter, todos, search, setSearch, currentUser }) => {
         })}
       </div>
 
-      {/* Contenu des onglets */}
       <div className="bg-base-100 rounded-lg p-3 border">
         {renderTabContent()}
       </div>

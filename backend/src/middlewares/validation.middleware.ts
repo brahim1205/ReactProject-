@@ -6,9 +6,7 @@ export interface ValidatedRequest extends Request {
   validatedData?: any;
 }
 
-/**
- * Middleware pour valider et parser un ID depuis les paramètres de route
- */
+
 export const validateId = (req: ValidatedRequest, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
@@ -33,9 +31,7 @@ export const validateId = (req: ValidatedRequest, res: Response, next: NextFunct
   }
 };
 
-/**
- * Middleware pour valider les données de statut de tâche
- */
+
 export const validateStatus = (req: ValidatedRequest, res: Response, next: NextFunction) => {
   try {
     const { status } = req.body;
@@ -62,14 +58,12 @@ export const validateStatus = (req: ValidatedRequest, res: Response, next: NextF
   }
 };
 
-/**
- * Middleware pour valider les données d'assignation
- */
+
 export const validateAssignment = (req: ValidatedRequest, res: Response, next: NextFunction) => {
   try {
     const { assignedToId } = req.body;
 
-    if (!assignedToId) {
+    if (assignedToId === undefined) {
       logger.warn('Missing assignedToId parameter');
       return res.status(400).json({
         success: false,
@@ -78,12 +72,17 @@ export const validateAssignment = (req: ValidatedRequest, res: Response, next: N
       });
     }
 
+    if (assignedToId === null) {
+      req.validatedData = { assignedToId: null };
+      return next();
+    }
+
     const assignedToIdNum = Number(assignedToId);
     if (isNaN(assignedToIdNum) || assignedToIdNum <= 0) {
       logger.warn('Invalid assignedToId parameter', { assignedToId });
       return res.status(400).json({
         success: false,
-        message: "assignedToId doit être un nombre valide",
+        message: "assignedToId doit être un nombre valide positif ou null",
         timestamp: new Date().toISOString()
       });
     }
@@ -100,9 +99,6 @@ export const validateAssignment = (req: ValidatedRequest, res: Response, next: N
   }
 };
 
-/**
- * Middleware générique pour valider les champs requis
- */
 export const validateRequired = (fields: string[]) => {
   return (req: ValidatedRequest, res: Response, next: NextFunction) => {
     try {

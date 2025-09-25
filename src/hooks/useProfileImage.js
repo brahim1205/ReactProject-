@@ -11,14 +11,11 @@ export const useProfileImage = () => {
     setError(null);
 
     try {
-      // Créer un FormData pour l'upload
       const formData = new FormData();
       formData.append('image', file);
 
-      // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
 
-      // Upload vers le serveur
       const response = await fetch(`http://localhost:3011/users/${userId}/profile-image`, {
         method: 'PATCH',
         headers: {

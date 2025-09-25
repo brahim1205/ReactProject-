@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // Créer des utilisateurs de test
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   const user1 = await prisma.user.upsert({
@@ -33,7 +32,6 @@ async function main() {
   console.log("- test@example.com / password123");
   console.log("- admin@example.com / password123");
 
-  // Créer quelques tâches de test
   const todo1 = await prisma.todo.create({
     data: {
       title: "Première tâche",

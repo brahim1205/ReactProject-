@@ -7,7 +7,6 @@ export const useNotifications = (userId) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Charger les notifications
   const loadNotifications = useCallback(async () => {
     if (!userId) return;
 
@@ -25,7 +24,6 @@ export const useNotifications = (userId) => {
     }
   }, [userId]);
 
-  // Charger le nombre de notifications non lues
   const loadUnreadCount = useCallback(async () => {
     if (!userId) return;
 
@@ -37,13 +35,11 @@ export const useNotifications = (userId) => {
     }
   }, [userId]);
 
-  // Marquer une notification comme lue
   const markAsRead = useCallback(async (notificationId) => {
     if (!userId) return;
 
     try {
       await notificationService.markAsRead(notificationId, userId);
-      // Mettre à jour l'état local
       setNotifications(prev =>
         prev.map(notif =>
           notif.id === notificationId ? { ...notif, isRead: true } : notif
@@ -55,13 +51,11 @@ export const useNotifications = (userId) => {
     }
   }, [userId]);
 
-  // Marquer toutes les notifications comme lues
   const markAllAsRead = useCallback(async () => {
     if (!userId) return;
 
     try {
       await notificationService.markAllAsRead(userId);
-      // Mettre à jour l'état local
       setNotifications(prev =>
         prev.map(notif => ({ ...notif, isRead: true }))
       );
@@ -71,7 +65,6 @@ export const useNotifications = (userId) => {
     }
   }, [userId]);
 
-  // Charger les données au montage et quand userId change
   useEffect(() => {
     if (userId) {
       loadNotifications();

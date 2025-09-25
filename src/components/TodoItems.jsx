@@ -49,6 +49,7 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
   const isAssigned = todo.assignedToId === currentUser?.id;
   const canEdit = (isOwner || isAssigned) && todo.status !== 'completed';
   const canAssign = isOwner && todo.status !== 'completed';
+  const canUnassign = isAssigned && todo.status !== 'completed'; // L'utilisateur assigné peut se désassigner
   const canToggleComplete = (isOwner || isAssigned) && todo.status !== 'completed';
   const canDelete = isOwner;
 
@@ -128,7 +129,6 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
                     {todo.title || todo.text}
                   </span>
 
-                  {/* Indicateur de tâche planifiée */}
                   {(todo.startDateTime || todo.endDateTime) && (
                     <div className="flex items-center gap-1 mt-1">
                       <span className="text-xs bg-info/20 text-info px-2 py-1 rounded-full">
@@ -153,7 +153,6 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
                  {todo.priority}
                </span>
 
-               {/* Badge de statut */}
                <span className={`inline-flex items-center gap-1 badge badge-sm ${
                  todo.status === 'completed' ? 'badge-success' :
                  todo.status === 'in_progress' ? 'badge-warning' :
@@ -164,6 +163,13 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
                   todo.status === 'in_progress' ? 'En cours' :
                   'En attente'}
                </span>
+
+               {todo.assignedTo && (
+                 <span className="inline-flex items-center gap-1 badge badge-sm badge-primary">
+                   <User className="w-3 h-3" />
+                   Assignée à {todo.assignedTo.name}
+                 </span>
+               )}
              </div>
 
             {todo.imageUrl && (
@@ -277,7 +283,6 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
               </>
             ) : (
               <>
-                {/* Bouton d'assignation séparé */}
                 {canAssign && (
                   <div ref={dropdownRef} className={`dropdown dropdown-left ${showAssignDropdown ? 'dropdown-open' : ''}`}>
                     <button
@@ -288,43 +293,86 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
                       <UserPlus className="w-4 h-4" />
                     </button>
                     {showAssignDropdown && (
-                      <ul className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-64 max-h-64 overflow-auto">
-                        <li className="menu-title"><span>Assigner à</span></li>
-                        <li className="px-2 py-1">
-                          <input
-                            id={`search-users-${todo.id}`}
-                            name={`search-users-${todo.id}`}
-                            type="text"
-                            className="input input-sm input-bordered w-full"
-                            placeholder="Rechercher un utilisateur..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                            autoComplete="off"
-                            aria-label="Rechercher un utilisateur à assigner"
-                          />
+                      <ul className="dropdown-content z-[10] menu p-2 shadow-lg bg-base-100 rounded-box w-72 max-h-80 overflow-auto border border-base-300">
+                        <li className="menu-title">
+                          <span className="flex items-center gap-2">
+                            <UserPlus className="w-4 h-4" />
+                            Assigner la tâche
+                          </span>
                         </li>
-                        {filteredUsers?.map(user => (
-                          <li key={user.id}>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-sm w-full text-left justify-start"
-                              onClick={(e) => { stop(e); handleAssign(user.id); }}
-                              aria-label={`Assigner la tâche à ${user.name}`}
-                            >
-                              {user.name}
-                            </button>
-                          </li>
-                        ))}
+
+                        <li className="px-2 py-2">
+                          <div className="form-control">
+                            <input
+                              id={`search-users-${todo.id}`}
+                              name={`search-users-${todo.id}`}
+                              type="text"
+                              className="input input-sm input-bordered w-full"
+                              placeholder="Rechercher un utilisateur..."
+                              value={search}
+                              onChange={(e) => setSearch(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              autoComplete="off"
+                              aria-label="Rechercher un utilisateur à assigner"
+                            />
+                          </div>
+                        </li>
+
+                        {canUnassign && (
+                          <>
+                            <li className="divider my-1"></li>
+                            <li>
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-sm w-full text-left justify-start text-error hover:bg-error/10"
+                                onClick={(e) => { stop(e); handleAssign(null); }}
+                                aria-label="Se désassigner de la tâche"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Se désassigner
+                              </button>
+                            </li>
+                          </>
+                        )}
+
+                        {filteredUsers && filteredUsers.length > 0 && (
+                          <>
+                            {(canUnassign || todo.assignedToId) && <li className="divider my-1"></li>}
+                            <li className="menu-title text-xs opacity-70">
+                              <span>Utilisateurs disponibles</span>
+                            </li>
+                            {filteredUsers.map(user => (
+                              <li key={user.id}>
+                                <button
+                                  type="button"
+                                  className={`btn btn-ghost btn-sm w-full text-left justify-start ${
+                                    user.id === todo.assignedToId ? 'bg-primary/10 text-primary' : ''
+                                  }`}
+                                  onClick={(e) => { stop(e); handleAssign(user.id); }}
+                                  aria-label={`Assigner la tâche à ${user.name}`}
+                                >
+                                  <div className="flex items-center justify-between w-full">
+                                    <span>{user.name}</span>
+                                    {user.id === todo.assignedToId && (
+                                      <Check className="w-4 h-4 text-primary" />
+                                    )}
+                                  </div>
+                                </button>
+                              </li>
+                            ))}
+                          </>
+                        )}
+
                         {(!filteredUsers || filteredUsers.length === 0) && (
-                          <li className="px-2 py-1 text-xs opacity-60">Aucun résultat</li>
+                          <li className="px-4 py-2 text-center text-sm opacity-60">
+                            {search.trim() ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur disponible'}
+                          </li>
                         )}
                       </ul>
                     )}
                   </div>
                 )}
 
-                {/* Menu d'actions avec trois points pour modifier et supprimer */}
                 {(canEdit || canDelete) && (
                   <div ref={actionsMenuRef} className={`dropdown dropdown-left ${showActionsMenu ? 'dropdown-open' : ''}`}>
                     <button
@@ -378,7 +426,6 @@ const TodoItem = memo(({ todo, onDelete, onToggleComplete, onUpdate, onAssign, c
 
 TodoItem.displayName = 'TodoItem';
 
-// Custom comparison function to prevent unnecessary re-renders
 const arePropsEqual = (prevProps, nextProps) => {
   return (
     prevProps.todo.id === nextProps.todo.id &&

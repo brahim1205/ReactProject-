@@ -8,12 +8,10 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(_error) {
-    // Mettre à jour l'état pour afficher l'UI d'erreur
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log l'erreur
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
       error: error,
@@ -23,7 +21,6 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // UI d'erreur personnalisée
       return (
         <div className="min-h-screen flex items-center justify-center bg-base-200">
           <div className="card bg-base-100 shadow-xl max-w-md">

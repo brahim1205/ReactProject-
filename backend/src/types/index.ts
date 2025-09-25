@@ -17,7 +17,7 @@ export interface UpdateTodoDto {
   priority?: string;
   status?: string;
   completed?: boolean;
-  assignedToId?: number;
+  assignedToId?: number | null;
   imageUrl?: string;
   audioUrl?: string;
   startDateTime?: string;
@@ -53,7 +53,7 @@ export interface ITodoService {
   createTodo(data: CreateTodoDto): Promise<TodoResponseDto>;
   updateTodo(id: number, data: UpdateTodoDto, senderId?: number): Promise<TodoResponseDto>;
   deleteTodo(id: number): Promise<void>;
-  delegateTodo(id: number, assignedToId: number, senderId?: number): Promise<TodoResponseDto>;
+  delegateTodo(id: number, assignedToId: number | null, senderId?: number): Promise<TodoResponseDto>;
   updateImage(id: number, imageUrl: string): Promise<TodoResponseDto>;
   updateAudio(id: number, audioUrl: string): Promise<TodoResponseDto>;
 }

@@ -44,7 +44,6 @@ export class TodoBusinessService {
     }
   }
 
-
   async updateTodo(id, data) {
 
     const validationErrors = this.validationService.validateTodoUpdate(data);
@@ -78,7 +77,7 @@ export class TodoBusinessService {
   }
 
   async delegateTodo(id, assignedToId) {
-    if (!assignedToId || assignedToId <= 0) {
+    if (assignedToId !== null && (assignedToId <= 0)) {
       throw new Error('ID d\'utilisateur assigné invalide');
     }
 

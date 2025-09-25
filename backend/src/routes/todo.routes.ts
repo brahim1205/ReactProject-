@@ -9,7 +9,6 @@ import multer from "multer";
 const router = Router();
 const controller = new TodoController(container.getTodoService());
 
-// Routes publiques (pas d'authentification requise pour la création)
 router.post("/", controller.create);
 router.post("/with-image", upload.single("image"), controller.createWithImage);
 router.post("/with-audio", upload.single("audio"), controller.createWithAudio);
@@ -18,10 +17,8 @@ router.post("/with-media", upload.fields([
   { name: 'audio', maxCount: 1 }
 ]), controller.createWithMedia);
 
-// Appliquer l'authentification à toutes les autres routes
 router.use(authenticate);
 
-// Routes nécessitant un ID valide
 router.get("/:id", validateId, controller.getById);
 router.put("/:id", validateId, controller.update);
 router.patch("/:id", validateId, controller.updatePartial);
@@ -31,7 +28,6 @@ router.patch("/:id/audio", validateId, controller.updateAudio);
 router.patch("/:id/image", validateId, controller.updateImage);
 router.delete("/:id", validateId, controller.remove);
 
-// Route générale (pas d'ID requis)
 router.get("/", controller.getAll);
 
 export default router;

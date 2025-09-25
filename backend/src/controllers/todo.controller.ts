@@ -6,7 +6,6 @@ import prisma from "../config/prisma";
 import { sendNotification } from "../server";
 import logger from "../utils/logger";
 
-// Classe utilitaire pour les réponses HTTP standardisées
 class HttpResponse {
   static success<T>(res: Response, data: T, statusCode: number = 200) {
     return res.status(statusCode).json({
@@ -89,7 +88,6 @@ export class TodoController {
     };
 
     if (files) {
-      // Pour createWithMedia (plusieurs fichiers)
       if (files?.image?.[0]) {
         data.imageUrl = `/uploads/${files.image[0].filename}`;
       }
@@ -97,7 +95,6 @@ export class TodoController {
         data.audioUrl = `/uploads/${files.audio[0].filename}`;
       }
     } else if (file) {
-      // Pour createWithImage ou createWithAudio (un seul fichier)
       const fieldName = file.fieldname;
       if (fieldName === 'image') {
         data.imageUrl = `/uploads/${file.filename}`;
@@ -150,17 +147,15 @@ export class TodoController {
       const oldTodo = await this.todoService.getTodoById(id);
       const todo = await this.todoService.updateTodo(id, data, req.userId);
 
-      // Créer une notification pour le propriétaire ou l'assignateur si c'est quelqu'un d'autre qui modifie
       if (oldTodo && req.userId) {
         let recipientId: number | null = oldTodo.userId;
 
-        // Si la tâche est assignée et que l'utilisateur actuel est l'assigné, notifier l'assignateur
         if (oldTodo.assignedToId && oldTodo.assignedToId === req.userId) {
-          recipientId = oldTodo.userId; // L'assignateur reçoit la notification
+          recipientId = oldTodo.userId; 
         } else if (oldTodo.userId !== req.userId) {
-          recipientId = oldTodo.userId; // Le propriétaire reçoit la notification
+          recipientId = oldTodo.userId; 
         } else {
-          recipientId = null; // Pas de notification si c'est le propriétaire qui modifie sa propre tâche
+          recipientId = null; 
         }
 
         if (recipientId && recipientId !== req.userId) {
@@ -219,7 +214,6 @@ export class TodoController {
       const todo = await this.todoService.updateTodo(req.validatedId!, { status: newStatus });
       const userId = (req as any).userId;
 
-      // Créer une notification système pour l'utilisateur lui-même
       if (userId) {
         const statusMessage = newStatus === 'completed' ? 'terminée' : newStatus === 'in_progress' ? 'en cours' : 'en attente';
 
@@ -229,24 +223,22 @@ export class TodoController {
             title: 'Tâche mise à jour',
             message: `Tâche "${todo.title}" marquée comme ${statusMessage}`,
             recipientId: userId,
-            senderId: userId, // Lui-même
+            senderId: userId, 
             todoId: req.validatedId!,
             todoTitle: todo.title
           }
         });
       }
 
-      // Créer une notification au créateur ou assignateur pour tous les changements de statut par quelqu'un d'autre
       if (oldTodo && userId) {
         let recipientId: number | null = oldTodo.userId;
 
-        // Si la tâche est assignée et que l'utilisateur actuel est l'assigné, notifier l'assignateur
         if (oldTodo.assignedToId && oldTodo.assignedToId === userId) {
-          recipientId = oldTodo.userId; // L'assignateur reçoit la notification
+          recipientId = oldTodo.userId; 
         } else if (oldTodo.userId !== userId) {
-          recipientId = oldTodo.userId; // Le propriétaire reçoit la notification
+          recipientId = oldTodo.userId; 
         } else {
-          recipientId = null; // Pas de notification si c'est le propriétaire qui modifie sa propre tâche
+          recipientId = null; 
         }
 
         if (recipientId && recipientId !== userId) {
@@ -300,13 +292,14 @@ export class TodoController {
       }
 
       const { assignedToId } = req.body;
-      if (!assignedToId) {
-        return HttpResponse.error(res, "assignedToId est requis", 400);
+      if (assignedToId === undefined || assignedToId === null) {
+        const todo = await this.todoService.delegateTodo(id, null, req.userId);
+        return HttpResponse.success(res, { message: "Tâche désassignée avec succès", todo });
       }
 
       const assignedToIdNum = Number(assignedToId);
-      if (isNaN(assignedToIdNum)) {
-        return HttpResponse.error(res, "assignedToId doit être un nombre valide", 400);
+      if (isNaN(assignedToIdNum) || assignedToIdNum <= 0) {
+        return HttpResponse.error(res, "assignedToId doit être un nombre valide positif", 400);
       }
 
       const todo = await this.todoService.delegateTodo(id, assignedToIdNum, req.userId);
@@ -318,7 +311,6 @@ export class TodoController {
         todoTitle: todo.title
       });
 
-      // Créer une notification pour l'utilisateur assigné seulement si ce n'est pas lui-même
       if (req.userId !== assignedToIdNum) {
         try {
           const notification = await prisma.notification.create({
@@ -339,7 +331,6 @@ export class TodoController {
             todoId: id
           });
 
-          // Envoyer la notification en temps réel via WebSocket
           const notificationData = {
             id: notification.id,
             type: notification.type,

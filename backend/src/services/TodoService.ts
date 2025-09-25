@@ -76,15 +76,16 @@ export class TodoService implements ITodoService {
   }
 
 
-  async delegateTodo(id: number, assignedToId: number, senderId?: number): Promise<TodoResponseDto> {
-    if (!assignedToId || assignedToId <= 0) {
+  async delegateTodo(id: number, assignedToId: number | null, senderId?: number): Promise<TodoResponseDto> {
+    // Pour la désassignation, assignedToId peut être null
+    if (assignedToId !== null && (assignedToId <= 0)) {
       throw new Error('ID d\'utilisateur assigné invalide');
     }
 
     const todo = await this.updateTodo(id, { assignedToId });
 
-    // Créer une notification si le service est disponible
-    if (this.notificationService && senderId) {
+    // Créer une notification seulement si on assigne (pas pour la désassignation)
+    if (this.notificationService && senderId && assignedToId !== null) {
       try {
         await this.notificationService.notifyTaskAssigned(id, todo.title, senderId, assignedToId);
       } catch (error) {

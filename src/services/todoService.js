@@ -10,7 +10,6 @@ export const todoService = {
     }
   },
 
-  
   async createTodo(todoData) {
     try {
       const response = await api.post('/todo', todoData);
@@ -19,7 +18,6 @@ export const todoService = {
       throw error.response?.data || { message: 'Erreur lors de la création de la tâche' };
     }
   },
-
 
   async createTodoWithImage(formData) {
     try {
@@ -64,7 +62,6 @@ export const todoService = {
     }
   },
 
-
   async toggleComplete(id, completed) {
     try {
       const status = completed ? 'completed' : 'pending';
@@ -75,7 +72,6 @@ export const todoService = {
     }
   },
 
-
   async assignTodo(id, assignedToId) {
     try {
       const response = await api.patch(`/todo/${id}/delegate`, { assignedToId });
@@ -85,7 +81,6 @@ export const todoService = {
     }
   },
 
-
   async deleteTodo(id) {
     try {
       const response = await api.delete(`/todo/${id}`);
@@ -94,7 +89,6 @@ export const todoService = {
       throw error.response?.data || { message: 'Erreur lors de la suppression de la tâche' };
     }
   },
-
 
   async updateImage(id, imageUrl) {
     try {

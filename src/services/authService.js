@@ -12,8 +12,6 @@ export const authService = {
     }
   },
 
-
-
   async login(credentials) {
     try {
       const response = await api.post('/auth/login', credentials);
@@ -28,8 +26,6 @@ export const authService = {
       throw error.response?.data || { message: 'Erreur lors de la connexion' };
     }
   },
-
-  
 
   logout() {
     localStorage.removeItem('token');

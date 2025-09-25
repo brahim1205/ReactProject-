@@ -45,7 +45,6 @@ export const useTodos = (currentUser) => {
 
     const newStatus = todo.status === 'completed' ? 'pending' : 'completed';
 
-    // Add to updating set
     setUpdatingIds(prev => new Set([...prev, id]));
 
     const newTodos = todos.map(t => {
@@ -78,7 +77,6 @@ export const useTodos = (currentUser) => {
       });
       setTodos(revertedTodos);
     } finally {
-      // Remove from updating set
       setUpdatingIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(id);
@@ -135,7 +133,7 @@ export const useTodos = (currentUser) => {
     if (!todo) return;
 
     try {
-      const assignedUser = users.find(u => u.id === assignedToId);
+      const assignedUser = assignedToId ? users.find(u => u.id === assignedToId) : null;
 
       const newTodos = todos.map(t => {
         if (t.id === id) {
@@ -152,7 +150,7 @@ export const useTodos = (currentUser) => {
       await todoBusiness.delegateTodo(id, assignedToId);
     } catch (error) {
       console.error("Erreur lors de l'assignation:", error);
-      showError("Erreur d'assignation", "Impossible d'assigner la tâche");
+      showError("Erreur d'assignation", assignedToId ? "Impossible d'assigner la tâche" : "Impossible de se désassigner");
 
       const revertedTodos = todos.map(t => {
         if (t.id === id) {

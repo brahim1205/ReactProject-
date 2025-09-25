@@ -4,9 +4,7 @@ import { sendNotification } from '../server';
 export class NotificationService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Crée une notification pour un utilisateur
-   */
+
   async createNotification(data: {
     type: string;
     title: string;
@@ -28,7 +26,6 @@ export class NotificationService {
       },
     });
 
-    // Envoyer la notification en temps réel via WebSocket
     sendNotification(data.recipientId, {
       id: notification.id,
       type: notification.type,
@@ -42,9 +39,7 @@ export class NotificationService {
     return notification;
   }
 
-  /**
-   * Récupère les notifications d'un utilisateur
-   */
+
   async getUserNotifications(userId: number, limit: number = 50) {
     return this.prisma.notification.findMany({
       where: { recipientId: userId },
@@ -58,9 +53,7 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Marque une notification comme lue
-   */
+
   async markAsRead(notificationId: number, userId: number) {
     return this.prisma.notification.updateMany({
       where: {
@@ -81,9 +74,7 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Compte les notifications non lues d'un utilisateur
-   */
+
   async getUnreadCount(userId: number) {
     return this.prisma.notification.count({
       where: {
@@ -93,9 +84,6 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Crée une notification quand une tâche est assignée
-   */
   async notifyTaskAssigned(todoId: number, todoTitle: string, senderId: number, recipientId: number) {
     const sender = await this.prisma.user.findUnique({
       where: { id: senderId },
@@ -113,9 +101,7 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Crée une notification quand une tâche est terminée
-   */
+
   async notifyTaskCompleted(todoId: number, todoTitle: string, completerId: number, originalAssigneeId: number) {
     const completer = await this.prisma.user.findUnique({
       where: { id: completerId },
@@ -133,9 +119,7 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Crée une notification de rappel pour une tâche
-   */
+
   async notifyTaskReminder(todoId: number, todoTitle: string, recipientId: number) {
     return this.createNotification({
       type: 'task_reminder',
@@ -147,9 +131,6 @@ export class NotificationService {
     });
   }
 
-  /**
-   * Crée une notification d'expiration imminente pour une tâche
-   */
   async notifyTaskExpiringSoon(todoId: number, todoTitle: string, recipientId: number) {
     return this.createNotification({
       type: 'task_expiring_soon',

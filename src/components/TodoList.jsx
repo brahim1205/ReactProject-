@@ -18,7 +18,6 @@ const TodoList = ({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Reset pagination when filter or search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, search]);
@@ -43,7 +42,6 @@ const TodoList = ({
     filteredTodos = todos.filter((todo) => todo.priority === filter);
   }
 
-  // Apply search filter
   if (search.trim()) {
     const searchLower = search.toLowerCase();
     filteredTodos = filteredTodos.filter((todo) =>
@@ -51,7 +49,6 @@ const TodoList = ({
     );
   }
 
-  // Pagination
   const totalPages = Math.ceil(filteredTodos.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTodos = filteredTodos.slice(startIndex, startIndex + itemsPerPage);
@@ -84,7 +81,6 @@ const TodoList = ({
           ))}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 mt-6">
             <button

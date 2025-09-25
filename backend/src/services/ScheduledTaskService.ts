@@ -4,9 +4,7 @@ import { NotificationService } from './NotificationService';
 export class ScheduledTaskService {
   constructor(private prisma: PrismaClient, private notificationService: NotificationService) {}
 
-  /**
-   * Met à jour automatiquement les statuts des tâches planifiées
-   */
+
   async updateScheduledTaskStatuses(): Promise<void> {
     const now = new Date();
 

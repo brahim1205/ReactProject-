@@ -9,7 +9,6 @@ const AudioVisualizer = ({ isPlaying }) => {
       return;
     }
 
-    // Animation CSS simple pour simuler des ondes
     const interval = setInterval(() => {
       setBars(prevBars =>
         prevBars.map(() => Math.random() * 100)

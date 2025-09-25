@@ -14,7 +14,6 @@ export const useAudioRecording = () => {
       console.log('🎤 Starting audio recording...');
       setError(null);
 
-      // Vérifier le support de l'API
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Votre navigateur ne supporte pas l\'enregistrement audio');
       }
@@ -31,7 +30,6 @@ export const useAudioRecording = () => {
 
       streamRef.current = stream;
 
-      // Essayer différents mimeTypes selon le support du navigateur
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         mimeType = 'audio/webm;codecs=opus';
@@ -63,7 +61,7 @@ export const useAudioRecording = () => {
         console.log('🎤 Recording complete');
       };
 
-      mediaRecorder.start(100); // Collecter les données toutes les 100ms
+      mediaRecorder.start(100); 
       setIsRecording(true);
       console.log('🎤 Recording started');
 
@@ -78,7 +76,6 @@ export const useAudioRecording = () => {
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      // Les event listeners géreront le nettoyage
     }
   }, [isRecording]);
 
@@ -87,18 +84,15 @@ export const useAudioRecording = () => {
       mediaRecorderRef.current.stop();
     }
 
-    // Nettoyer les ressources
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
 
-    // Réinitialiser l'état
     setAudioBlob(null);
     setAudioUrl(null);
     setError(null);
     setIsRecording(false);
 
-    // Nettoyer l'URL d'objet
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -108,7 +102,6 @@ export const useAudioRecording = () => {
     cancelRecording();
   }, [cancelRecording]);
 
-  // Nettoyer automatiquement lors du démontage du composant
   const cleanup = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());

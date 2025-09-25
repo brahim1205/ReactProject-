@@ -13,12 +13,10 @@ const Navigation = () => {
   const { notifications, markAsRead, loading: notificationsLoading } = useNotifications(user?.id);
   const { showSuccess, showError } = useToastContext();
 
-  // Trier les notifications par date (plus récentes en premier)
   const sortedNotifications = [...(notifications || [])].sort((a, b) =>
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  // Filtrer les notifications système (celles sans sender.name)
   const filteredNotifications = sortedNotifications.filter(notification => notification.sender?.name);
   const filteredUnreadCount = filteredNotifications.filter(notification => !notification.isRead).length;
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -28,7 +26,6 @@ const Navigation = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Vérifier que les refs existent avant d'accéder à contains
       if (profileMenuRef.current && profileMenuRef.current.contains && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
       }
@@ -43,7 +40,6 @@ const Navigation = () => {
 
   const handleLogout = () => {
     logout();
-    // Navigate to login page
     navigate('/login', { replace: true });
   };
 
@@ -67,7 +63,6 @@ const Navigation = () => {
         showError('Erreur', 'Impossible de mettre à jour la photo de profil');
       }
     }
-    // Reset the input value to allow selecting the same file again
     event.target.value = '';
   };
 
@@ -83,7 +78,6 @@ const Navigation = () => {
       <div className="flex-none gap-2">
         {isAuthenticated ? (
           <>
-            {/* Icône de notifications */}
             <div ref={notificationsRef} className="dropdown dropdown-end">
               <button
                 className={`btn btn-circle ${filteredUnreadCount > 0 ? 'btn-error' : 'btn-ghost'}`}
@@ -173,7 +167,6 @@ const Navigation = () => {
               )}
             </div>
 
-            {/* Menu profil */}
             <div ref={profileMenuRef} className="dropdown dropdown-end">
               <button
                 className="btn btn-ghost btn-circle avatar"

@@ -10,7 +10,6 @@ export class Authcontroller {
     register = async (req:Request, res:Response)=>{
         const {name, email, password}=req.body;
 
-        // Validation des données
         if (!name || name.trim().length === 0) {
             return res.status(400).json({message: "Le nom est obligatoire"});
         }
@@ -19,7 +18,6 @@ export class Authcontroller {
             return res.status(400).json({message: "L'email est obligatoire"});
         }
 
-        // Validation du format email basique
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({message: "Format d'email invalide"});
@@ -39,39 +37,9 @@ export class Authcontroller {
             data:{name: name.trim(), email: email.trim().toLowerCase(), password:hashedPassword},
         });
 
-        // Créer des tâches de bienvenue pour le nouvel utilisateur
-        const welcomeTodos = [
-            {
-                title: "Bienvenue dans TodoList !",
-                description: "Découvrez votre nouvelle application de gestion des tâches.",
-                priority: "Moyenne",
-                userId: user.id,
-                createdBy: user.name,
-            },
-            {
-                title: "Ajouter votre première tâche",
-                description: "Cliquez sur 'Ajouter une tâche' pour créer votre première todo.",
-                priority: "Basse",
-                userId: user.id,
-                createdBy: user.name,
-            },
-            {
-                title: "Explorer les fonctionnalités",
-                description: "Découvrez les filtres, la recherche et les priorités.",
-                priority: "Basse",
-                userId: user.id,
-                createdBy: user.name,
-            }
-        ];
-
-        await prisma.todo.createMany({
-            data: welcomeTodos,
-        });
-
         res.json({message:"Utilisateur créé avec succès",user});
     };
 
-    //connexion
     login=async (req:Request, res:Response)=>{
         const {email,password}=req.body;
 
@@ -80,7 +48,6 @@ export class Authcontroller {
           return res.status(401).json({ message: "Utilisateur non trouvé" });
         }
 
-        // Vérifie que user.password existe et que password est bien transmis
         if (!password || !user.password) {
           return res.status(400).json({ message: "Mot de passe manquant" });
         }
@@ -94,7 +61,6 @@ export class Authcontroller {
              expiresIn: "1h",
             });
 
-        // Retourner les informations utilisateur (sans le mot de passe)
         const userResponse = {
             id: user.id,
             name: user.name,

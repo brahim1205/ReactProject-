@@ -20,7 +20,6 @@ const AuthForm = () => {
 
   const { login, register } = useAuth();
 
-  // Déterminer le mode initial basé sur l'URL
   useEffect(() => {
     const path = location.pathname;
     setIsLogin(path === '/login');

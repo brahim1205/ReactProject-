@@ -11,10 +11,8 @@ export const useSocket = () => {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Fonction pour jouer le son de cloche
   const playBellSound = () => {
     try {
-      // Créer un son de cloche simple avec Web Audio API
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const audioContext = new AudioContext();
       const oscillator = audioContext.createOscillator();
@@ -23,7 +21,6 @@ export const useSocket = () => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Configuration du son (cloche-like)
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
       oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
@@ -41,18 +38,15 @@ export const useSocket = () => {
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      // Récupérer le token depuis localStorage
       const token = localStorage.getItem('token');
 
       if (token) {
-        // Créer la connexion Socket.IO
         socketRef.current = io('http://localhost:3011', {
           auth: {
             token: token
           }
         });
 
-        // Écouter les événements de connexion
         socketRef.current.on('connect', () => {
           console.log('Connected to WebSocket server');
           setIsConnected(true);
@@ -63,24 +57,19 @@ export const useSocket = () => {
           setIsConnected(false);
         });
 
-        // Écouter les notifications en temps réel
         socketRef.current.on('notification', (notification) => {
           console.log('Received real-time notification:', notification);
 
-          // Recharger les notifications et le compteur
           loadNotifications();
           loadUnreadCount();
 
-          // Jouer un son pour les notifications d'expiration imminente
           if (notification.type === 'task_expiring_soon') {
             playBellSound();
           }
 
-          // Afficher une notification toast
           showInfo(`Nouvelle notification: ${notification.title}`);
         });
 
-        // Gérer les erreurs
         socketRef.current.on('connect_error', (error) => {
           console.error('Socket connection error:', error);
           setIsConnected(false);
@@ -88,7 +77,6 @@ export const useSocket = () => {
       }
     }
 
-    // Nettoyer la connexion lors du démontage ou changement d'utilisateur
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
